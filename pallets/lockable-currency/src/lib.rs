@@ -6,15 +6,6 @@
 
 pub use pallet::*;
 
-#[cfg(test)]
-mod mock;
-
-#[cfg(test)]
-mod tests;
-
-#[cfg(feature = "runtime-benchmarks")]
-mod benchmarking;
-
 #[frame_support::pallet]
 pub mod pallet {
 	use frame_support::{dispatch::DispatchResultWithPostInfo, pallet_prelude::*, 
@@ -64,7 +55,7 @@ pub mod pallet {
 	impl<T:Config> Pallet<T> {
 		
 		#[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
-		pub(super) fn lock_capital(
+		pub fn lock_capital(
 			origin: OriginFor<T>,
 			#[pallet::compact] amount: BalanceOf<T>
 		) -> DispatchResultWithPostInfo {
@@ -83,7 +74,7 @@ pub mod pallet {
 		}
 	
 		#[pallet::weight(1_000)]
-		pub(super) fn extend_lock(
+		pub fn extend_lock(
 			origin: OriginFor<T>,
 			#[pallet::compact] amount: BalanceOf<T>,
 		) -> DispatchResultWithPostInfo {
@@ -101,7 +92,7 @@ pub mod pallet {
 		}
 
 		#[pallet::weight(1_000)]
-		pub(super) fn unlock_all(
+		pub fn unlock_all(
 			origin: OriginFor<T>,
 		) -> DispatchResultWithPostInfo {
 			let user = ensure_signed(origin)?;

@@ -39,7 +39,6 @@ std = [
     'pallet-grandpa/std',
     'pallet-randomness-collective-flip/std',
     'pallet-sudo/std',
-    'pallet-template/std',
     'pallet-timestamp/std',
     'pallet-transaction-payment-rpc-runtime-api/std',
     'pallet-transaction-payment/std',
@@ -54,8 +53,15 @@ std = [
     'sp-std/std',
     'sp-transaction-pool/std',
     'sp-version/std',
+    'pallet-template/std',
     'pallet-kitties/std',
+    'pallet-oldkitties/std',
     'orml-nft/std',
+    'mint-token/std',
+    'proof-of-existence/std',
+    'simple-crowdfund/std',
+    'configurable-constant/std',
+    'pallet-reward-coin/std',
 ]
 [dependencies.codec]
 default-features = false
@@ -134,15 +140,6 @@ default-features = false
 git = 'https://github.com/paritytech/substrate.git'
 branch = 'polkadot-v0.9.8'
 version = '3.0.0'
-
-[dependencies.pallet-template]
-default-features = false
-path = '../pallets/template'
-version = '3.0.0'
-
-[dependencies.pallet-kitties]
-default-features = false
-path = '../pallets/kitties'
 
 [dependencies.pallet-timestamp]
 default-features = false
@@ -226,6 +223,47 @@ version = '3.0.0'
 default-features = false
 git = 'https://github.com/paritytech/substrate.git'
 branch = 'polkadot-v0.9.8'
+version = '3.0.0'
+
+
+[dependencies.pallet-template]
+default-features = false
+path = '../pallets/template'
+version = '3.0.0'
+
+[dependencies.pallet-kitties]
+default-features = false
+path = '../pallets/kitties'
+version = '3.0.0'
+
+[dependencies.pallet-oldkitties]
+default-features = false
+path = '../pallets/oldkitties'
+version = '3.0.0'
+
+[dependencies.mint-token]
+default-features = false
+path = '../pallets/mint-token'
+version = '3.0.0'
+
+[dependencies.pallet-reward-coin]
+default-features = false
+path = '../pallets/reward-coin'
+version = '3.0.0'
+
+[dependencies.proof-of-existence]
+default-features = false
+path = '../pallets/proof-of-existence'
+version = '3.0.0'
+
+[dependencies.simple-crowdfund]
+default-features = false
+path = '../pallets/simple-crowdfund'
+version = '3.0.0'
+
+[dependencies.configurable-constant]
+default-features = false
+path = '../pallets/configurable-constant'
 version = '3.0.0'
 
 [dependencies.orml-nft]

@@ -1,6 +1,6 @@
 [package]
 name = "pallet-kitties"
-version = "0.1.0"
+version = "3.0.0"
 authors = ["Bryan Chen"]
 edition = "2018"
 

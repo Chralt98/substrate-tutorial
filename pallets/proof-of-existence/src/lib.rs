@@ -47,7 +47,7 @@ pub mod pallet {
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         #[pallet::weight(1_000)]
-        pub(super) fn create_claim(
+        pub fn create_claim(
             origin: OriginFor<T>,
             proof: Vec<u8>,
         ) -> DispatchResultWithPostInfo {
@@ -61,7 +61,7 @@ pub mod pallet {
             ensure!(!Proofs::<T>::contains_key(&proof), Error::<T>::ProofAlreadyClaimed);
 
             // Get the block number from the FRAME System module.
-            let current_block = <frame_system::Module<T>>::block_number();
+            let current_block = <frame_system::Pallet<T>>::block_number();
 
             // Store the proof with the sender and block number.
            Proofs::<T>::insert(&proof, (&sender, current_block));
@@ -74,7 +74,7 @@ pub mod pallet {
         }
 
         #[pallet::weight(10_000)]
-        fn revoke_claim(
+        pub fn revoke_claim(
             origin: OriginFor<T>,
             proof: Vec<u8>,
         ) -> DispatchResultWithPostInfo {

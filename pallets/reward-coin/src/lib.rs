@@ -144,7 +144,7 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		#[pallet::weight(1_000)]
-		pub(super) fn mint(
+		pub fn mint(
 			origin: OriginFor<T>,
 			beneficiary: T::AccountId,
 			#[pallet::compact] amount: T::Balance,
@@ -168,7 +168,7 @@ pub mod pallet {
 		}
 
 		#[pallet::weight(1_000)]
-		pub(super) fn burn(
+		pub fn burn(
 			origin: OriginFor<T>,
 			burned: T::AccountId,
 			#[pallet::compact] amount: T::Balance,
@@ -207,7 +207,7 @@ pub mod pallet {
 
 		#[pallet::weight(1_000)]
 		#[transactional]
-		pub(super) fn transfer(
+		pub fn transfer(
 			origin: OriginFor<T>,
 			to: T::AccountId,
 			#[pallet::compact] amount: T::Balance,

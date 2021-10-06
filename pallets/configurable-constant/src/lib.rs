@@ -62,7 +62,7 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
     #[pallet::weight(1_000)]
 
-    fn add_value(
+    pub fn add_value(
         origin: OriginFor<T>,
         val_to_add: u32
         ) -> DispatchResultWithPostInfo {
