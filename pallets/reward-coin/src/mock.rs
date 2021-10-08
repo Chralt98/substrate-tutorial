@@ -1,4 +1,6 @@
 use crate as pallet_reward_coin;
+
+use super::*;
 use sp_core::H256;
 use frame_support::parameter_types;
 use sp_runtime::{
@@ -16,8 +18,8 @@ frame_support::construct_runtime!(
 		NodeBlock = Block,
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
-		System: frame_system::{Module, Call, Config, Storage, Event<T>},
-		RewardCoin: pallet_reward_coin::{Module, Call, Storage, Event<T>},
+		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+		RewardCoin: pallet_reward_coin::{Pallet, Call, Storage, Event<T>},
 	}
 );
 
@@ -26,7 +28,7 @@ parameter_types! {
 	pub const SS58Prefix: u8 = 42;
 }
 
-impl system::Config for Test {
+impl frame_system::Config for Test {
 	type BaseCallFilter = ();
 	type BlockWeights = ();
 	type BlockLength = ();
@@ -49,13 +51,14 @@ impl system::Config for Test {
 	type OnKilledAccount = ();
 	type SystemWeightInfo = ();
 	type SS58Prefix = SS58Prefix;
+	type OnSetCode = ();
 }
 
 parameter_types! {
 	pub const MinBalance: u128 = 10;
 }
 
-impl pallet_reward_coin::Config for Test {
+impl Config for Test {
 	type Event = Event;
 	type Balance = u128;
 	type MinBalance = MinBalance;

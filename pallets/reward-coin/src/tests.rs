@@ -29,8 +29,10 @@ fn transfer_works() {
 
 		assert_noop!(RewardCoin::transfer(Origin::signed(2), 3, 50), Error::<Test>::InsufficientBalance);
 
+		// when 2 would send 41 coins to 4 then 2 would have not at least 10 coins minimum balance anymore
 		assert_noop!(RewardCoin::transfer(Origin::signed(2), 4, 41), Error::<Test>::BelowMinBalance);
 
+		// when 2 would send 1 coin to 4 then 4 would not have at least 10 coins minimum balance
 		assert_noop!(RewardCoin::transfer(Origin::signed(2), 4, 1), Error::<Test>::BelowMinBalance);
 
 		assert_ok!(RewardCoin::transfer(Origin::signed(2), 3, 15));

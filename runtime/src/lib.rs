@@ -48,6 +48,10 @@ pub use pallet_template;
 
 pub use configurable_constant;
 pub use mint_token;
+pub use pallet_reward_coin;
+pub use lockable_currency;
+pub use simple_crowdfund;
+pub use proof_of_existence;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -279,14 +283,31 @@ impl pallet_template::Config for Runtime {
     type Event = Event;
 }
 
-parameter_types! {
-    pub const DefaultDifficulty: u32 = 100000;
-}
-
 // Configure mint_token.
 impl mint_token::Config for Runtime {
     type Event = Event;
     type Balance = Balance;
+}
+
+parameter_types! {
+    pub const MinBalance: Balance = 50;
+}
+
+impl pallet_reward_coin::Config for Runtime {
+    type Event = Event;
+    type Balance = Balance;
+    type MinBalance = MinBalance;
+}
+
+parameter_types! {
+    pub const MaxKittyOwned: u32 = 10;
+}
+
+impl pallet_oldkitties::Config for Runtime {
+    type Event = Event;
+    type KittyRandomness = RandomnessCollectiveFlip;
+    type Currency = Balances;
+    type MaxKittyOwned = MaxKittyOwned;
 }
 
 // Configurable constants pallet.
@@ -299,6 +320,44 @@ impl configurable_constant::Config for Runtime {
     type Event = Event;
     type MaxAddend = MaxAddend;
     type ClearFrequency = ClearFrequency;
+}
+
+impl proof_of_existence::Config for Runtime {
+    type Event = Event;
+}
+
+impl lockable_currency::Config for Runtime {
+    type Event = Event;
+    type Currency = Balances;
+}
+
+parameter_types! {
+	pub const SubmissionDeposit: u128 = 10;
+	pub const MinContribution: u128 = 10;
+	pub const RetirementPeriod: u32 = 10;
+}
+
+/// Configure the pallet-template in pallets/template.
+impl simple_crowdfund::Config for Runtime {
+	type Event = Event;
+
+	/// The currency in which the crowdfunds will be denominated
+	type Currency = Balances;
+
+	/// The amount to be held on deposit by the owner of a crowdfund
+	type SubmissionDeposit = SubmissionDeposit;
+
+	/// The minimum amount that may be contributed into a crowdfund. Should almost certainly be at
+	/// least ExistentialDeposit.
+	type MinContribution = MinContribution;
+
+	/// The period of time (in blocks) after an unsuccessful crowdfund ending during which
+	/// contributors are able to withdraw their funds. After this period, their funds are lost.
+	type RetirementPeriod = RetirementPeriod;
+}
+
+parameter_types! {
+    pub const DefaultDifficulty: u32 = 100000;
 }
 
 impl pallet_kitties::Config for Runtime {
@@ -350,9 +409,14 @@ construct_runtime!(
         TemplateModule: pallet_template::{Pallet, Call, Storage, Event<T>},
         // Substrate Kitties pallet
         Kitties: pallet_kitties::{Pallet, Storage, Call, Event<T>, Config, ValidateUnsigned},
+        OldKitties: pallet_oldkitties::{Pallet, Storage, Call, Event<T>, Config<T>},
         Nft: orml_nft::{Pallet, Storage, Config<T>},
 		MintSupply: mint_token::{Pallet, Call, Storage, Event<T>},
+        RewardCoin: pallet_reward_coin::{Pallet, Call, Storage, Event<T>},
 		ConfigConstants: configurable_constant::{Pallet, Call, Storage, Event<T>},
+        ProofOfExistence: proof_of_existence::{Pallet, Call, Storage, Event<T>},
+        SimpleCrowdfund: simple_crowdfund::{Pallet, Call, Storage, Event<T>},
+        LockableCurrency: lockable_currency::{Pallet, Call, Storage, Event<T>},
     }
 );
 

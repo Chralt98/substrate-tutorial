@@ -19,7 +19,6 @@ frame_support::construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
         MintSupply: mint_token::{Pallet, Call, Storage, Event<T>},
 	}
 );
@@ -48,27 +47,12 @@ impl frame_system::Config for Test {
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
 	type PalletInfo = PalletInfo;
-	type AccountData = pallet_balances::AccountData<u64>;
+	type AccountData = ();
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type SystemWeightInfo = ();
 	type SS58Prefix = SS58Prefix;
 	type OnSetCode = ();
-}
-
-parameter_types! {
-	pub const ExistentialDeposit: u64 = 1;
-}
-impl pallet_balances::Config for Test {
-	type MaxLocks = ();
-	type Balance = u64;
-	type Event = Event;
-	type DustRemoval = ();
-	type ExistentialDeposit = ExistentialDeposit;
-	type AccountStore = System;
-	type WeightInfo = ();
-	type MaxReserves = ();
-	type ReserveIdentifier = ();
 }
 
 impl Config for Test {
@@ -78,11 +62,7 @@ impl Config for Test {
 
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
-
-	pallet_balances::GenesisConfig::<Test> {
-		balances: vec![(1, 1000), (2, 2000), (3, 3000), (4, 4000)],
-	}.assimilate_storage(&mut t).unwrap();
+	let t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
 
 	let mut t: sp_io::TestExternalities = t.into();
 

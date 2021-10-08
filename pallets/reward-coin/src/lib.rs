@@ -3,17 +3,15 @@
 /// Edit this file to define custom logic or remove it if it is not needed.
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
 /// https://substrate.dev/docs/en/knowledgebase/runtime/frame
-
 use sp_std::prelude::*;
 
-use codec::{Encode, Decode};
-use sp_runtime::{
-	RuntimeDebug, traits::{
-		AtLeast32BitUnsigned, Zero, Saturating, CheckedAdd, CheckedSub,
-	},
-};
+use codec::{Decode, Encode};
 use frame_support::dispatch::DispatchResult;
 use frame_support::transactional;
+use sp_runtime::{
+	traits::{AtLeast32BitUnsigned, CheckedAdd, CheckedSub, Saturating, Zero},
+	RuntimeDebug,
+};
 
 #[cfg(test)]
 mod mock;
@@ -35,11 +33,11 @@ pub use pallet::*;
 // through `construct_runtime`.
 #[frame_support::pallet]
 pub mod pallet {
+	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
-	use super::*;
 
-	// Simple declaration of the `Pallet` type. It is a placeholder we use 
+	// Simple declaration of the `Pallet` type. It is a placeholder we use
 	// to implement traits and methods.
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
@@ -60,11 +58,13 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn meta_data)]
-	pub(super) type MetaDataStore<T: Config> = StorageValue<_, MetaData<T::AccountId, T::Balance>, ValueQuery>;
+	pub(super) type MetaDataStore<T: Config> =
+		StorageValue<_, MetaData<T::AccountId, T::Balance>, ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn account)]
-	pub(super) type Accounts<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, T::Balance, ValueQuery>;
+	pub(super) type Accounts<T: Config> =
+		StorageMap<_, Blake2_128Concat, T::AccountId, T::Balance, ValueQuery>;
 
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
@@ -121,7 +121,7 @@ pub mod pallet {
 	// You can implement the [`Hooks`] trait to define some logic
 	// that should be exectued regularly in some context.
 	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+	impl<T: Config> Hooks<T::BlockNumber> for Pallet<T> {
 		// `on_initialize` is executed at the beginning of the block before any extrinsics are
 		// dispatched.
 		//
@@ -154,7 +154,10 @@ pub mod pallet {
 			let mut meta = Self::meta_data();
 			ensure!(sender == meta.minter, Error::<T>::NoPermission);
 
-			meta.issuance = meta.issuance.checked_add(&amount).ok_or(Error::<T>::Overflow)?;
+			meta.issuance = meta
+				.issuance
+				.checked_add(&amount)
+				.ok_or(Error::<T>::Overflow)?;
 
 			// store the new issuance
 			MetaDataStore::<T>::put(meta);
@@ -184,13 +187,19 @@ pub mod pallet {
 			let burn_amount = if new_balance < T::MinBalance::get() {
 				ensure!(allow_killing, Error::<T>::BelowMinBalance);
 				let burn_amount = balance;
-				ensure!(meta.issuance.checked_sub(&burn_amount).is_some(), Error::<T>::Underflow);
+				ensure!(
+					meta.issuance.checked_sub(&burn_amount).is_some(),
+					Error::<T>::Underflow
+				);
 				Accounts::<T>::remove(&burned);
 				Self::deposit_event(Event::<T>::Killed(burned.clone()));
 				burn_amount
 			} else {
 				let burn_amount = amount;
-				ensure!(meta.issuance.checked_sub(&burn_amount).is_some(), Error::<T>::Underflow);
+				ensure!(
+					meta.issuance.checked_sub(&burn_amount).is_some(),
+					Error::<T>::Underflow
+				);
 				Accounts::<T>::insert(&burned, new_balance);
 				burn_amount
 			};
@@ -215,12 +224,13 @@ pub mod pallet {
 			let sender = ensure_signed(origin)?;
 
 			Accounts::<T>::try_mutate(&sender, |bal| -> DispatchResult {
-				let new_bal = bal.checked_sub(&amount).ok_or(Error::<T>::InsufficientBalance)?;
+				let new_bal = bal
+					.checked_sub(&amount)
+					.ok_or(Error::<T>::InsufficientBalance)?;
 				ensure!(new_bal >= T::MinBalance::get(), Error::<T>::BelowMinBalance);
 				*bal = new_bal;
 				Ok(())
 			})?;
-		
 			Accounts::<T>::try_mutate(&to, |rec_bal| -> DispatchResult {
 				let new_bal = rec_bal.saturating_add(amount);
 				ensure!(new_bal >= T::MinBalance::get(), Error::<T>::BelowMinBalance);

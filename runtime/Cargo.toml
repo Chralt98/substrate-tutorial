@@ -266,6 +266,11 @@ default-features = false
 path = '../pallets/configurable-constant'
 version = '3.0.0'
 
+[dependencies.lockable-currency]
+default-features = false
+path = '../pallets/lockable-currency'
+version = '3.0.0'
+
 [dependencies.orml-nft]
 default-features = false
 git = 'https://github.com/open-web3-stack/open-runtime-module-library.git'
