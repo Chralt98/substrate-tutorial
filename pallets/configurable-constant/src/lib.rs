@@ -71,11 +71,17 @@ pub mod pallet {
             let c_val = SingleValue::<T>::get();
 
             // checks for overflow when new value added
-            let result = c_val.checked_add(val_to_add).ok_or(Error::<T>::Overflow)?;
+            let result = Self::_adder(c_val, val_to_add)?;
 
             <SingleValue<T>>::put(result);
             Self::deposit_event(Event::Added(c_val, val_to_add, result));
             Ok(().into())
+        }
+    }
+
+    impl<T: Config> Pallet<T> {
+        fn _adder(num1: u32, num2: u32) -> Result<u32, Error<T>> {
+            num1.checked_add(num2).ok_or(Error::<T>::Overflow)
         }
     }
 }
