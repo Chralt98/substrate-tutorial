@@ -2,23 +2,12 @@
 
 use frame_support::{
 	pallet_prelude::*,
-	traits::{Randomness, Currency, ExistenceRequirement},
+	traits::{Currency, ExistenceRequirement, Randomness},
 	transactional,
 };
 use frame_system::{
-	pallet_prelude::*,
 	offchain::{SendTransactionTypes, SubmitTransaction},
-};
-use sp_std::{
-	prelude::*,
-	convert::TryInto
-};
-use sp_io::hashing::blake2_128;
-use sp_runtime::offchain::storage_lock::{StorageLock, BlockAndTime};
-use sp_runtime::{
-	traits::{
-		Zero,
-	},
+	pallet_prelude::*,
 };
 use rand_chacha::{
 	rand_core::{RngCore, SeedableRng},
@@ -26,13 +15,17 @@ use rand_chacha::{
 };
 #[cfg(feature = "std")]
 use serde::{Deserialize, Serialize};
+use sp_io::hashing::blake2_128;
+use sp_runtime::offchain::storage_lock::{BlockAndTime, StorageLock};
+use sp_runtime::traits::Zero;
+use sp_std::{convert::TryInto, prelude::*};
 
 pub use pallet::*;
 
-#[cfg(test)]
-mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
+#[cfg(test)]
+mod tests;
 mod weights;
 
 pub use weights::WeightInfo;
@@ -62,7 +55,11 @@ pub mod pallet {
 	use super::*;
 
 	#[pallet::config]
-	pub trait Config: frame_system::Config + orml_nft::Config<TokenData = Kitty, ClassData = ()> + SendTransactionTypes<Call<Self>> {
+	pub trait Config:
+		frame_system::Config
+		+ orml_nft::Config<TokenData = Kitty, ClassData = ()>
+		+ SendTransactionTypes<Call<Self>>
+	{
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 		type Randomness: Randomness<Self::Hash, Self::BlockNumber>;
 		type Currency: Currency<Self::AccountId>;
@@ -72,16 +69,14 @@ pub mod pallet {
 	}
 
 	pub type KittyIndexOf<T> = <T as orml_nft::Config>::TokenId;
-	pub type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+	pub type BalanceOf<T> =
+		<<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 	/// Get kitty price. None means not for sale.
 	#[pallet::storage]
 	#[pallet::getter(fn kitty_prices)]
-	pub type KittyPrices<T: Config> = StorageMap<
-		_,
-		Blake2_128Concat, KittyIndexOf<T>,
-		BalanceOf<T>, OptionQuery
-	>;
+	pub type KittyPrices<T: Config> =
+		StorageMap<_, Blake2_128Concat, KittyIndexOf<T>, BalanceOf<T>, OptionQuery>;
 
 	/// The class id for orml_nft
 	#[pallet::storage]
@@ -95,7 +90,8 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn kitty_difficulty_multiplier)]
-	pub type KittyDifficultyMultiplier<T:Config> = StorageMap<_, Blake2_128Concat, KittyIndexOf<T>, u32, ValueQuery>;
+	pub type KittyDifficultyMultiplier<T: Config> =
+		StorageMap<_, Blake2_128Concat, KittyIndexOf<T>, u32, ValueQuery>;
 
 	#[pallet::genesis_config]
 	#[derive(Default)]
@@ -152,8 +148,7 @@ pub mod pallet {
 	}
 
 	#[pallet::call]
-	impl<T:Config> Pallet<T> {
-
+	impl<T: Config> Pallet<T> {
 		/// Create a new kitty
 		#[pallet::weight(T::WeightInfo::create())]
 		pub fn create(origin: OriginFor<T>) -> DispatchResult {
@@ -163,7 +158,8 @@ pub mod pallet {
 
 			// Create and store kitty
 			let kitty = Kitty(dna);
-			let kitty_id = orml_nft::Pallet::<T>::mint(&sender, Self::class_id(), Vec::new(), kitty.clone())?;
+			let kitty_id =
+				orml_nft::Pallet::<T>::mint(&sender, Self::class_id(), Vec::new(), kitty.clone())?;
 
 			// Emit event
 			Self::deposit_event(Event::KittyCreated(sender, kitty_id, kitty));
@@ -173,7 +169,11 @@ pub mod pallet {
 
 		/// Breed kitties
 		#[pallet::weight(T::WeightInfo::breed())]
-		pub fn breed(origin: OriginFor<T>, kitty_id_1: KittyIndexOf<T>, kitty_id_2: KittyIndexOf<T>) -> DispatchResult {
+		pub fn breed(
+			origin: OriginFor<T>,
+			kitty_id_1: KittyIndexOf<T>,
+			kitty_id_2: KittyIndexOf<T>,
+		) -> DispatchResult {
 			let sender = ensure_signed(origin)?;
 			let kitty1 = Self::kitties(&sender, kitty_id_1).ok_or(Error::<T>::InvalidKittyId)?;
 			let kitty2 = Self::kitties(&sender, kitty_id_2).ok_or(Error::<T>::InvalidKittyId)?;
@@ -183,7 +183,11 @@ pub mod pallet {
 
 		/// Transfer a kitty to new owner
 		#[pallet::weight(T::WeightInfo::transfer())]
-		pub fn transfer(origin: OriginFor<T>, to: T::AccountId, kitty_id: KittyIndexOf<T>) -> DispatchResult {
+		pub fn transfer(
+			origin: OriginFor<T>,
+			to: T::AccountId,
+			kitty_id: KittyIndexOf<T>,
+		) -> DispatchResult {
 			let sender = ensure_signed(origin)?;
 
 			orml_nft::Pallet::<T>::transfer(&sender, &to, (Self::class_id(), kitty_id))?;
@@ -198,12 +202,19 @@ pub mod pallet {
 		}
 
 		/// Set a price for a kitty for sale
- 		/// None to delist the kitty
+		/// None to delist the kitty
 		#[pallet::weight(T::WeightInfo::set_price())]
-		pub fn set_price(origin: OriginFor<T>, kitty_id: KittyIndexOf<T>, new_price: Option<BalanceOf<T>>) -> DispatchResult {
+		pub fn set_price(
+			origin: OriginFor<T>,
+			kitty_id: KittyIndexOf<T>,
+			new_price: Option<BalanceOf<T>>,
+		) -> DispatchResult {
 			let sender = ensure_signed(origin)?;
 
-			ensure!(orml_nft::TokensByOwner::<T>::contains_key(&sender, (Self::class_id(), kitty_id)), Error::<T>::NotOwner);
+			ensure!(
+				orml_nft::TokensByOwner::<T>::contains_key(&sender, (Self::class_id(), kitty_id)),
+				Error::<T>::NotOwner
+			);
 
 			KittyPrices::<T>::mutate_exists(kitty_id, |price| *price = new_price);
 
@@ -215,7 +226,12 @@ pub mod pallet {
 		/// Buy a kitty
 		#[pallet::weight(T::WeightInfo::buy())]
 		#[transactional]
-		pub fn buy(origin: OriginFor<T>, owner: T::AccountId, kitty_id: KittyIndexOf<T>, max_price: BalanceOf<T>) -> DispatchResult {
+		pub fn buy(
+			origin: OriginFor<T>,
+			owner: T::AccountId,
+			kitty_id: KittyIndexOf<T>,
+			max_price: BalanceOf<T>,
+		) -> DispatchResult {
 			let sender = ensure_signed(origin)?;
 
 			ensure!(sender != owner, Error::<T>::BuyFromSelf);
@@ -235,16 +251,28 @@ pub mod pallet {
 		}
 
 		#[pallet::weight(1000)]
-		pub fn auto_breed(origin: OriginFor<T>, kitty_id_1: KittyIndexOf<T>, kitty_id_2: KittyIndexOf<T>, _nonce: u32, _solution: u128) -> DispatchResult {
+		pub fn auto_breed(
+			origin: OriginFor<T>,
+			kitty_id_1: KittyIndexOf<T>,
+			kitty_id_2: KittyIndexOf<T>,
+			_nonce: u32,
+			_solution: u128,
+		) -> DispatchResult {
 			ensure_none(origin)?;
 
-			let kitty1 = orml_nft::Pallet::<T>::tokens(Self::class_id(), kitty_id_1).ok_or(Error::<T>::InvalidKittyId)?;
-			let kitty2 = orml_nft::Pallet::<T>::tokens(Self::class_id(), kitty_id_2).ok_or(Error::<T>::InvalidKittyId)?;
+			let kitty1 = orml_nft::Pallet::<T>::tokens(Self::class_id(), kitty_id_1)
+				.ok_or(Error::<T>::InvalidKittyId)?;
+			let kitty2 = orml_nft::Pallet::<T>::tokens(Self::class_id(), kitty_id_2)
+				.ok_or(Error::<T>::InvalidKittyId)?;
 
 			let breed_result = Self::do_breed(kitty1.owner, kitty1.data, kitty2.data)?;
 
-			KittyDifficultyMultiplier::<T>::mutate_exists(kitty_id_1, |difficulty| *difficulty = Some(difficulty.unwrap_or_else(|| Zero::zero()).saturating_add(1)));
-			KittyDifficultyMultiplier::<T>::mutate_exists(kitty_id_2, |difficulty| *difficulty = Some(difficulty.unwrap_or_else(|| Zero::zero()).saturating_add(1)));
+			KittyDifficultyMultiplier::<T>::mutate_exists(kitty_id_1, |difficulty| {
+				*difficulty = Some(difficulty.unwrap_or_else(|| Zero::zero()).saturating_add(1))
+			});
+			KittyDifficultyMultiplier::<T>::mutate_exists(kitty_id_2, |difficulty| {
+				*difficulty = Some(difficulty.unwrap_or_else(|| Zero::zero()).saturating_add(1))
+			});
 
 			Ok(breed_result)
 		}
@@ -271,7 +299,7 @@ pub mod pallet {
 					} else {
 						InvalidTransaction::BadProof.into()
 					}
-				},
+				}
 				_ => InvalidTransaction::Call.into(),
 			}
 		}
@@ -302,11 +330,7 @@ impl<T: Config> Pallet<T> {
 		payload.using_encoded(blake2_128)
 	}
 
-	fn do_breed(
-		owner: T::AccountId,
-		kitty1: Kitty,
-		kitty2: Kitty,
-	) -> DispatchResult {
+	fn do_breed(owner: T::AccountId, kitty1: Kitty, kitty2: Kitty) -> DispatchResult {
 		ensure!(kitty1.gender() != kitty2.gender(), Error::<T>::SameGender);
 
 		let kitty1_dna = kitty1.0;
@@ -321,14 +345,20 @@ impl<T: Config> Pallet<T> {
 		}
 
 		let new_kitty = Kitty(new_dna);
-		let kitty_id = orml_nft::Pallet::<T>::mint(&owner, Self::class_id(), Vec::new(), new_kitty.clone())?;
+		let kitty_id =
+			orml_nft::Pallet::<T>::mint(&owner, Self::class_id(), Vec::new(), new_kitty.clone())?;
 
 		Self::deposit_event(Event::KittyBred(owner, kitty_id, new_kitty));
 
 		Ok(())
 	}
 
-	fn validate_solution(kitty_id_1: KittyIndexOf<T>, kitty_id_2: KittyIndexOf<T>, nonce: u32, solution: u128) -> bool {
+	fn validate_solution(
+		kitty_id_1: KittyIndexOf<T>,
+		kitty_id_2: KittyIndexOf<T>,
+		nonce: u32,
+		solution: u128,
+	) -> bool {
 		let payload = (kitty_id_1, kitty_id_2, nonce, solution);
 		let hash = payload.using_encoded(blake2_128);
 		let hash_value = u128::from_le_bytes(hash);
@@ -341,14 +371,20 @@ impl<T: Config> Pallet<T> {
 	}
 
 	fn run_offchain_worker() -> Result<(), ()> {
-		let mut lock = StorageLock::<'_, BlockAndTime<frame_system::Pallet<T>>>::with_block_deadline(&b"kitties/lock"[..], 1);
+		let mut lock =
+			StorageLock::<'_, BlockAndTime<frame_system::Pallet<T>>>::with_block_deadline(
+				&b"kitties/lock"[..],
+				1,
+			);
 		let _guard = lock.try_lock().map_err(|_| ())?;
 
 		let random_seed = sp_io::offchain::random_seed();
 		let mut rng = ChaChaRng::from_seed(random_seed);
 
 		// this only support if kitty_count <= u32::max_value()
-		let kitty_count = TryInto::<u32>::try_into(orml_nft::Pallet::<T>::next_token_id(Self::class_id())).map_err(|_| ())?;
+		let kitty_count =
+			TryInto::<u32>::try_into(orml_nft::Pallet::<T>::next_token_id(Self::class_id()))
+				.map_err(|_| ())?;
 
 		if kitty_count == 0 {
 			return Ok(());
@@ -380,10 +416,12 @@ impl<T: Config> Pallet<T> {
 
 		let solution_prefix = rng.next_u32() as u128;
 
-		for i in 0 .. remaining_iterations {
+		for i in 0..remaining_iterations {
 			let solution = (solution_prefix << 32) + i;
 			if Self::validate_solution(kitty_1, kitty_2, nonce, solution) {
-				let _ = SubmitTransaction::<T, Call<T>>::submit_unsigned_transaction(Call::<T>::auto_breed(kitty_1, kitty_2, nonce, solution).into());
+				let _ = SubmitTransaction::<T, Call<T>>::submit_unsigned_transaction(
+					Call::<T>::auto_breed(kitty_1, kitty_2, nonce, solution).into(),
+				);
 				break;
 			}
 		}

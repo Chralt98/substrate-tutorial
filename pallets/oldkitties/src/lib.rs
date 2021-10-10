@@ -128,7 +128,9 @@ pub mod pallet {
 	#[cfg(feature = "std")]
 	impl<T: Config> Default for GenesisConfig<T> {
 		fn default() -> GenesisConfig<T> {
-			GenesisConfig { old_kitties: vec![] }
+			GenesisConfig {
+				old_kitties: vec![],
+			}
 		}
 	}
 
@@ -168,7 +170,10 @@ pub mod pallet {
 		) -> DispatchResult {
 			let sender = ensure_signed(origin)?;
 
-			ensure!(Self::is_kitty_owner(&kitty_id, &sender)?, <Error<T>>::NotKittyOwner);
+			ensure!(
+				Self::is_kitty_owner(&kitty_id, &sender)?,
+				<Error<T>>::NotKittyOwner
+			);
 
 			let mut kitty = Self::kitties(&kitty_id).ok_or(<Error<T>>::KittyNotExist)?;
 
@@ -189,7 +194,10 @@ pub mod pallet {
 			let from = ensure_signed(origin)?;
 
 			// Ensure the kitty exists and is called by the kitty owner
-			ensure!(Self::is_kitty_owner(&kitty_id, &from)?, <Error<T>>::NotKittyOwner);
+			ensure!(
+				Self::is_kitty_owner(&kitty_id, &from)?,
+				<Error<T>>::NotKittyOwner
+			);
 
 			// Verify the kitty is not transferring back to its owner.
 			ensure!(from != to, <Error<T>>::TransferToSelf);
@@ -230,7 +238,10 @@ pub mod pallet {
 			}
 
 			// Check the buyer has enough free balance
-			ensure!(T::Currency::free_balance(&buyer) >= bid_price, <Error<T>>::NotEnoughBalance);
+			ensure!(
+				T::Currency::free_balance(&buyer) >= bid_price,
+				<Error<T>>::NotEnoughBalance
+			);
 
 			// Verify the buyer has the capacity to receive one more kitty
 			let to_owned = <KittiesOwned<T>>::get(&buyer);
@@ -262,8 +273,14 @@ pub mod pallet {
 			let sender = ensure_signed(origin)?;
 
 			// Check: Verify `sender` owns both kitties (and both kitties exist).
-			ensure!(Self::is_kitty_owner(&kid1, &sender)?, <Error<T>>::NotKittyOwner);
-			ensure!(Self::is_kitty_owner(&kid2, &sender)?, <Error<T>>::NotKittyOwner);
+			ensure!(
+				Self::is_kitty_owner(&kid1, &sender)?,
+				<Error<T>>::NotKittyOwner
+			);
+			ensure!(
+				Self::is_kitty_owner(&kid2, &sender)?,
+				<Error<T>>::NotKittyOwner
+			);
 
 			let new_dna = Self::breed_dna(&kid1, &kid2)?;
 
@@ -319,7 +336,9 @@ pub mod pallet {
 			let kitty_id = T::Hashing::hash_of(&kitty);
 
 			// Performs this operation first as it may fail
-			let new_cnt = Self::kitty_cnt().checked_add(1).ok_or(<Error<T>>::KittyCntOverflow)?;
+			let new_cnt = Self::kitty_cnt()
+				.checked_add(1)
+				.ok_or(<Error<T>>::KittyCntOverflow)?;
 
 			// Performs this operation first because as it may fail
 			<KittiesOwned<T>>::try_mutate(&owner, |kitty_vec| kitty_vec.try_push(kitty_id))

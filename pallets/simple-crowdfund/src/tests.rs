@@ -1,5 +1,5 @@
-use crate::{Error, FundInfo, mock::*};
-use frame_support::{assert_ok, assert_noop};
+use crate::{mock::*, Error, FundInfo};
+use frame_support::{assert_noop, assert_ok};
 
 use pallet_balances::Error as BalancesError;
 
@@ -32,7 +32,10 @@ fn create_works() {
 		// User has deposit removed from their free balance
 		assert_eq!(Balances::free_balance(1), 999);
 		// Deposit is placed in crowdfund free balance
-		assert_eq!(Balances::free_balance(SimpleCrowdfund::fund_account_id(0)), 1);
+		assert_eq!(
+			Balances::free_balance(SimpleCrowdfund::fund_account_id(0)),
+			1
+		);
 	});
 }
 
@@ -52,7 +55,10 @@ fn contribute_works() {
 		// Set up a crowdfund
 		assert_ok!(SimpleCrowdfund::create(Origin::signed(1), 2, 1000, 9));
 		assert_eq!(Balances::free_balance(1), 999);
-		assert_eq!(Balances::free_balance(SimpleCrowdfund::fund_account_id(0)), 1);
+		assert_eq!(
+			Balances::free_balance(SimpleCrowdfund::fund_account_id(0)),
+			1
+		);
 
 		// No contributions yet
 		assert_eq!(SimpleCrowdfund::contribution_get(0, &1), 0);
@@ -64,7 +70,10 @@ fn contribute_works() {
 		// Contributions are stored in the trie
 		assert_eq!(SimpleCrowdfund::contribution_get(0, &1), 49);
 		// Contributions appear in free balance of crowdfund
-		assert_eq!(Balances::free_balance(SimpleCrowdfund::fund_account_id(0)), 50);
+		assert_eq!(
+			Balances::free_balance(SimpleCrowdfund::fund_account_id(0)),
+			50
+		);
 		// Last contribution time recorded
 		assert_eq!(SimpleCrowdfund::funds(0).unwrap().raised, 49);
 	});
@@ -176,13 +185,19 @@ fn dissolve_works() {
 		// Check initiator's balance.
 		assert_eq!(Balances::free_balance(1), 899);
 		// Check current funds (contributions + deposit)
-		assert_eq!(Balances::free_balance(SimpleCrowdfund::fund_account_id(0)), 601);
+		assert_eq!(
+			Balances::free_balance(SimpleCrowdfund::fund_account_id(0)),
+			601
+		);
 
 		// Account 7 dissolves the crowdfund claiming the remaining funds
 		assert_ok!(SimpleCrowdfund::dissolve(Origin::signed(7), 0));
 
 		// Fund account is emptied
-		assert_eq!(Balances::free_balance(SimpleCrowdfund::fund_account_id(0)), 0);
+		assert_eq!(
+			Balances::free_balance(SimpleCrowdfund::fund_account_id(0)),
+			0
+		);
 		// Dissolver account is rewarded
 		assert_eq!(Balances::free_balance(7), 601);
 
@@ -242,13 +257,19 @@ fn dispense_works() {
 		// Check initiator's balance.
 		assert_eq!(Balances::free_balance(1), 899);
 		// Check current funds (contributions + deposit)
-		assert_eq!(Balances::free_balance(SimpleCrowdfund::fund_account_id(0)), 1001);
+		assert_eq!(
+			Balances::free_balance(SimpleCrowdfund::fund_account_id(0)),
+			1001
+		);
 
 		// Account 7 dispenses the crowdfund
 		assert_ok!(SimpleCrowdfund::dispense(Origin::signed(7), 0));
 
 		// Fund account is emptied
-		assert_eq!(Balances::free_balance(SimpleCrowdfund::fund_account_id(0)), 0);
+		assert_eq!(
+			Balances::free_balance(SimpleCrowdfund::fund_account_id(0)),
+			0
+		);
 		// Beneficiary account is funded
 		assert_eq!(Balances::free_balance(20), 1000);
 		// Dispensor account is rewarded deposit

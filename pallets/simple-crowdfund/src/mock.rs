@@ -1,7 +1,7 @@
-use crate::{self as simple_crowdfund, Config};
 use super::*;
+use crate::{self as simple_crowdfund, Config};
 
-use frame_support::{parameter_types};
+use frame_support::parameter_types;
 use sp_core::H256;
 use sp_runtime::{
 	testing::Header,
@@ -109,16 +109,20 @@ impl Config for Test {
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+	let mut t = frame_system::GenesisConfig::default()
+		.build_storage::<Test>()
+		.unwrap();
 	// EXPLA: looks like a view bug of VS, ignore it that the GenesisConfig would not be found... it is found!
 	pallet_balances::GenesisConfig::<Test> {
 		balances: vec![(1, 1000), (2, 2000), (3, 3000), (4, 4000)],
-	}.assimilate_storage(&mut t).unwrap();
+	}
+	.assimilate_storage(&mut t)
+	.unwrap();
 	t.into()
 }
 
-use crate::mock::sp_api_hidden_includes_construct_runtime::hidden_include::traits::OnInitialize;
 use crate::mock::sp_api_hidden_includes_construct_runtime::hidden_include::traits::OnFinalize;
+use crate::mock::sp_api_hidden_includes_construct_runtime::hidden_include::traits::OnInitialize;
 
 pub fn run_to_block(n: u64) {
 	while System::block_number() < n {

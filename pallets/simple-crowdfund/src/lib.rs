@@ -24,9 +24,7 @@ pub mod pallet {
 	use frame_support::{
 		ensure,
 		pallet_prelude::*,
-		sp_runtime::{
-			traits::{AccountIdConversion, Hash, Saturating, Zero},
-		},
+		sp_runtime::traits::{AccountIdConversion, Hash, Saturating, Zero},
 		storage::child,
 		traits::{Currency, ExistenceRequirement, Get, ReservableCurrency, WithdrawReasons},
 		PalletId,

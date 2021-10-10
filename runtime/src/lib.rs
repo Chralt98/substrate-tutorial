@@ -47,11 +47,11 @@ mod weights;
 pub use pallet_template;
 
 pub use configurable_constant;
+pub use lockable_currency;
 pub use mint_token;
 pub use pallet_reward_coin;
-pub use lockable_currency;
-pub use simple_crowdfund;
 pub use proof_of_existence;
+pub use simple_crowdfund;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -312,8 +312,8 @@ impl pallet_oldkitties::Config for Runtime {
 
 // Configurable constants pallet.
 parameter_types! {
-	pub const MaxAddend: u32 = 1738;
- 	pub const ClearFrequency: u32 = 10;
+    pub const MaxAddend: u32 = 1738;
+     pub const ClearFrequency: u32 = 10;
 }
 
 impl configurable_constant::Config for Runtime {
@@ -332,28 +332,28 @@ impl lockable_currency::Config for Runtime {
 }
 
 parameter_types! {
-	pub const SubmissionDeposit: u128 = 10;
-	pub const MinContribution: u128 = 10;
-	pub const RetirementPeriod: u32 = 10;
+    pub const SubmissionDeposit: u128 = 10;
+    pub const MinContribution: u128 = 10;
+    pub const RetirementPeriod: u32 = 10;
 }
 
 /// Configure the pallet-template in pallets/template.
 impl simple_crowdfund::Config for Runtime {
-	type Event = Event;
+    type Event = Event;
 
-	/// The currency in which the crowdfunds will be denominated
-	type Currency = Balances;
+    /// The currency in which the crowdfunds will be denominated
+    type Currency = Balances;
 
-	/// The amount to be held on deposit by the owner of a crowdfund
-	type SubmissionDeposit = SubmissionDeposit;
+    /// The amount to be held on deposit by the owner of a crowdfund
+    type SubmissionDeposit = SubmissionDeposit;
 
-	/// The minimum amount that may be contributed into a crowdfund. Should almost certainly be at
-	/// least ExistentialDeposit.
-	type MinContribution = MinContribution;
+    /// The minimum amount that may be contributed into a crowdfund. Should almost certainly be at
+    /// least ExistentialDeposit.
+    type MinContribution = MinContribution;
 
-	/// The period of time (in blocks) after an unsuccessful crowdfund ending during which
-	/// contributors are able to withdraw their funds. After this period, their funds are lost.
-	type RetirementPeriod = RetirementPeriod;
+    /// The period of time (in blocks) after an unsuccessful crowdfund ending during which
+    /// contributors are able to withdraw their funds. After this period, their funds are lost.
+    type RetirementPeriod = RetirementPeriod;
 }
 
 parameter_types! {
@@ -411,9 +411,9 @@ construct_runtime!(
         Kitties: pallet_kitties::{Pallet, Storage, Call, Event<T>, Config, ValidateUnsigned},
         OldKitties: pallet_oldkitties::{Pallet, Storage, Call, Event<T>, Config<T>},
         Nft: orml_nft::{Pallet, Storage, Config<T>},
-		MintSupply: mint_token::{Pallet, Call, Storage, Event<T>},
+        MintSupply: mint_token::{Pallet, Call, Storage, Event<T>},
         RewardCoin: pallet_reward_coin::{Pallet, Call, Storage, Event<T>},
-		ConfigConstants: configurable_constant::{Pallet, Call, Storage, Event<T>},
+        ConfigConstants: configurable_constant::{Pallet, Call, Storage, Event<T>},
         ProofOfExistence: proof_of_existence::{Pallet, Call, Storage, Event<T>},
         SimpleCrowdfund: simple_crowdfund::{Pallet, Call, Storage, Event<T>},
         LockableCurrency: lockable_currency::{Pallet, Call, Storage, Event<T>},
@@ -605,7 +605,7 @@ impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_timestamp, Timestamp);
             add_benchmark!(params, batches, pallet_template, TemplateModule);
             add_benchmark!(params, batches, pallet_kitties, Kitties);
-			add_benchmark!(params, batches, simple_crowdfund, SimpleCrowdfund);
+            add_benchmark!(params, batches, simple_crowdfund, SimpleCrowdfund);
 
             if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
             Ok(batches)

@@ -1,7 +1,7 @@
 use super::*;
 
+use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite, whitelisted_caller};
 use frame_system::RawOrigin;
-use frame_benchmarking::{benchmarks, impl_benchmark_test_suite, whitelisted_caller, account};
 
 benchmarks! {
 	create {
@@ -46,8 +46,4 @@ benchmarks! {
 	}: _(RawOrigin::Signed(caller), seller, kitty_id, 500u32.into())
 }
 
-impl_benchmark_test_suite!(
-	Pallet,
-	crate::tests::new_test_ext(),
-	crate::tests::Test,
-);
+impl_benchmark_test_suite!(Pallet, crate::tests::new_test_ext(), crate::tests::Test,);

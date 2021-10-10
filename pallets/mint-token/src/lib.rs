@@ -96,7 +96,8 @@ pub mod pallet {
 			#[pallet::compact] amount: T::Balance,
 		) -> DispatchResultWithPostInfo {
 			let sender = ensure_signed(origin)?;
-			let sender_balance = <BalanceToAccount<T>>::get(&sender);
+			// or use <BalanceToAccount<T>>::get(&sender);
+			let sender_balance = Self::get_balance(&sender);
 			let receiver_balance = Self::get_balance(&to);
 
 			// Calculate new balances.

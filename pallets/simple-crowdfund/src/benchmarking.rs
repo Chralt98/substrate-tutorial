@@ -2,10 +2,10 @@
 
 use super::*;
 
-use frame_system::RawOrigin;
-use frame_benchmarking::{benchmarks, whitelisted_caller, account, impl_benchmark_test_suite};
 #[allow(unused)]
 use crate::Pallet as SimpleCrowdfund;
+use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite, whitelisted_caller};
+use frame_system::RawOrigin;
 
 benchmarks! {
 	test_create_crowdfunds {
@@ -19,8 +19,4 @@ benchmarks! {
 	}
 }
 
-impl_benchmark_test_suite!(
-	Pallet,
-	crate::mock::new_test_ext(),
-	crate::mock::Test
-);
+impl_benchmark_test_suite!(Pallet, crate::mock::new_test_ext(), crate::mock::Test);

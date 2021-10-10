@@ -1,12 +1,11 @@
 use super::*;
 
 use crate as mint_token;
+use frame_support::parameter_types;
 use sp_core::H256;
-use frame_support::{
-	parameter_types,
-};
 use sp_runtime::{
-	traits::{BlakeTwo256, IdentityLookup}, testing::Header,
+	testing::Header,
+	traits::{BlakeTwo256, IdentityLookup},
 };
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
@@ -19,10 +18,9 @@ frame_support::construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-        MintSupply: mint_token::{Pallet, Call, Storage, Event<T>},
+		MintSupply: mint_token::{Pallet, Call, Storage, Event<T>},
 	}
 );
-
 
 parameter_types! {
 	pub const BlockHashCount: u64 = 250;
@@ -56,16 +54,18 @@ impl frame_system::Config for Test {
 }
 
 impl Config for Test {
-    type Event = Event;
-    type Balance = u128;
+	type Event = Event;
+	type Balance = u128;
 }
 
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	let t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+	let t = frame_system::GenesisConfig::default()
+		.build_storage::<Test>()
+		.unwrap();
 
 	let mut t: sp_io::TestExternalities = t.into();
 
-	t.execute_with(|| System::set_block_number(1) );
+	t.execute_with(|| System::set_block_number(1));
 	t.into()
 }
