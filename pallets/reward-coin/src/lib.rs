@@ -129,6 +129,7 @@ pub mod pallet {
 		fn on_initialize(_n: T::BlockNumber) -> Weight {
 			// Anything that needs to be done at the start of the block.
 			// We don't do anything here.
+			// this secures, that the admin has always enough (MinBalance = 50) balance
 			let mut meta = MetaDataStore::<T>::get();
 			let value: T::Balance = 50u8.into();
 			meta.issuance = meta.issuance.saturating_add(value);
@@ -150,8 +151,10 @@ pub mod pallet {
 			#[pallet::compact] amount: T::Balance,
 		) -> DispatchResultWithPostInfo {
 			let sender = ensure_signed(origin)?;
+			// first time only admin has got the minimum balance
 			ensure!(amount >= T::MinBalance::get(), Error::<T>::BelowMinBalance);
 			let mut meta = Self::meta_data();
+			// admin is the only minter defined in MetaDataStore
 			ensure!(sender == meta.minter, Error::<T>::NoPermission);
 
 			meta.issuance = meta
@@ -163,6 +166,7 @@ pub mod pallet {
 			MetaDataStore::<T>::put(meta);
 
 			if Self::increase_balance(&beneficiary, amount) {
+				// event only when the balance was Zero before the increase
 				Self::deposit_event(Event::<T>::Created(beneficiary.clone()));
 			}
 			Self::deposit_event(Event::<T>::Minted(beneficiary, amount));
@@ -185,21 +189,25 @@ pub mod pallet {
 			ensure!(balance > Zero::zero(), Error::<T>::CannotBurnEmpty);
 			let new_balance = balance.saturating_sub(amount);
 			let burn_amount = if new_balance < T::MinBalance::get() {
+				// new balance is to small -> burn account out of storage
 				ensure!(allow_killing, Error::<T>::BelowMinBalance);
 				let burn_amount = balance;
 				ensure!(
 					meta.issuance.checked_sub(&burn_amount).is_some(),
 					Error::<T>::Underflow
 				);
+				// remove account from storage
 				Accounts::<T>::remove(&burned);
 				Self::deposit_event(Event::<T>::Killed(burned.clone()));
 				burn_amount
 			} else {
+				// new balance is big enough to survive
 				let burn_amount = amount;
 				ensure!(
 					meta.issuance.checked_sub(&burn_amount).is_some(),
 					Error::<T>::Underflow
 				);
+				// override the balance of the account
 				Accounts::<T>::insert(&burned, new_balance);
 				burn_amount
 			};
@@ -224,20 +232,27 @@ pub mod pallet {
 			let sender = ensure_signed(origin)?;
 
 			Accounts::<T>::try_mutate(&sender, |bal| -> DispatchResult {
+				// if sender doesn't have the amount, then insufficient
 				let new_bal = bal
 					.checked_sub(&amount)
 					.ok_or(Error::<T>::InsufficientBalance)?;
+				// existential deposit of MinBalance (50) is still required
 				ensure!(new_bal >= T::MinBalance::get(), Error::<T>::BelowMinBalance);
+				// if no errors of above hit, then assign new decreased balance to the sender
 				*bal = new_bal;
 				Ok(())
 			})?;
 			Accounts::<T>::try_mutate(&to, |rec_bal| -> DispatchResult {
+				// receiver balance addition
 				let new_bal = rec_bal.saturating_add(amount);
+				// existential deposit of MinBalance (50) is still required
 				ensure!(new_bal >= T::MinBalance::get(), Error::<T>::BelowMinBalance);
+				// assign if error doesn't hit
 				*rec_bal = new_bal;
 				Ok(())
 			})?;
 
+			// publish successful event
 			Self::deposit_event(Event::<T>::Transfered(sender, to, amount));
 
 			Ok(().into())
@@ -249,6 +264,7 @@ pub mod pallet {
 impl<T: Config> Pallet<T> {
 	fn increase_balance(acc: &T::AccountId, amount: T::Balance) -> bool {
 		Accounts::<T>::mutate(&acc, |bal| {
+			// created is a boolean to indicate if the Balance was Zero
 			let created = bal == &Zero::zero();
 			// fine because we check the issuance for overflow before minting and transfers
 			// don't change the issuance

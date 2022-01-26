@@ -44,6 +44,32 @@ fn transfer_works() {
 			Error::<Test>::BelowMinBalance
 		);
 
+		// 3 would have more than the MinBalance of 10 (and the 2 would have 15 to send, but more then MinBalance after the transfer), so it is successful 
 		assert_ok!(RewardCoin::transfer(Origin::signed(2), 3, 15));
+	});
+}
+
+#[test]
+fn transfer_works_atomic() {
+	new_test_ext().execute_with(|| {
+		MetaDataStore::<Test>::put(MetaData {
+			issuance: 0,
+			minter: 1,
+			burner: 1,
+		});
+		// Dispatch a signed extrinsic.
+		assert_ok!(RewardCoin::mint(Origin::signed(1), 2, 42));
+		System::assert_last_event(Event::RewardCoin(crate::Event::<Test>::Minted(
+			2, 42,
+		)));
+
+		assert_eq!(RewardCoin::account(&2), 42);
+
+		// this would fail for 3 because 3 hasn't got the MinBalance of 10
+		// the sender would have lost the 9 tokens
+		assert_noop!(RewardCoin::transfer(Origin::signed(2), 3, 9), Error::<Test>::BelowMinBalance);
+
+		// Account 2 got still a Balance of 42, so the storage seems reverted
+		assert_eq!(RewardCoin::account(&2), 42);
 	});
 }

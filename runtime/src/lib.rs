@@ -290,7 +290,7 @@ impl mint_token::Config for Runtime {
 }
 
 parameter_types! {
-    pub const MinBalance: Balance = 50;
+    pub const MinBalance: Balance = 10;
 }
 
 impl pallet_reward_coin::Config for Runtime {
