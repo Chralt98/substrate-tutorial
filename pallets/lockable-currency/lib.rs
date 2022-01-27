@@ -99,7 +99,7 @@ pub mod pallet {
 
 			// Update both accounts storage.
 			<BalanceToAccount<T>>::insert(&sender, update_sender);
-			<BalanceToAccount<T>>::insert(&sender, update_to);
+			<BalanceToAccount<T>>::insert(&to, update_to);
 
 			// Emit event.
 			Self::deposit_event(Event::Transferred(sender, to, amount));

@@ -70,6 +70,7 @@ fn transfer_works_atomic() {
 		assert_noop!(RewardCoin::transfer(Origin::signed(2), 3, 9), Error::<Test>::BelowMinBalance);
 
 		// Account 2 got still a Balance of 42, so the storage seems reverted
+		// it is because the #[transactional] annotation 
 		assert_eq!(RewardCoin::account(&2), 42);
 	});
 }
